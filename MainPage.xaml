@@ -1,0 +1,447 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SubscriptionTracker.ViewModels"
+             xmlns:models="clr-namespace:SubscriptionTracker.Models"
+             x:Class="SubscriptionTracker.MainPage"
+             BackgroundColor="#1A0A2E"
+             Shell.NavBarIsVisible="False">
+
+    <ContentPage.BindingContext>
+        <vm:MainViewModel/>
+    </ContentPage.BindingContext>
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+        <!-- 헤더 -->
+        <Border Grid.Row="0"
+                Padding="20,52,20,20">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#2D1B4E" Offset="0"/>
+                    <GradientStop Color="#1A0A2E" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="0,0,24,24"/>
+            </Border.StrokeShape>
+            <Border.Stroke>
+                <SolidColorBrush Color="#4A3570"/>
+            </Border.Stroke>
+
+            <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="14">
+
+                <!-- 타이틀 -->
+                <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                    <VerticalStackLayout Grid.Column="0">
+                        <Label FontSize="26" FontAttributes="Bold"
+                               TextColor="#F5F0FF">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="Pay" TextColor="#A855F7" FontAttributes="Bold"/>
+                                    <Span Text="Check" TextColor="#F5F0FF" FontAttributes="Bold"/>
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                        <Label Text="{Binding ExchangeRateText}"
+                               FontSize="11" TextColor="#7C6A9E"
+                               Margin="0,2,0,0"/>
+                    </VerticalStackLayout>
+
+                    <Border Grid.Column="1"
+                            BackgroundColor="#3D2B5E"
+                            Stroke="#4A3570"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 10"
+                            Padding="12,8">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnRefreshExchangeTapped"/>
+                        </Border.GestureRecognizers>
+                        <Label Text="💱" FontSize="18"
+                               HorizontalOptions="Center"/>
+                    </Border>
+
+                    <Border Grid.Column="2"
+                            BackgroundColor="#3D2B5E"
+                            Stroke="#4A3570"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 10"
+                            Padding="12,8">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnCheckUnusedTapped"/>
+                        </Border.GestureRecognizers>
+                        <Label Text="⚠️" FontSize="18"
+                               HorizontalOptions="Center"/>
+                    </Border>
+                </Grid>
+
+                <!-- 월간/연간 카드 -->
+                <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Border Grid.Column="0"
+                            Stroke="#4A3570"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="16,14">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#2D1B4E" Offset="0"/>
+                                <GradientStop Color="#3D2B5E" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="이번 달 지출"
+                                   FontSize="11" TextColor="#7C6A9E"/>
+                            <Label Text="{Binding TotalMonthlyText}"
+                                   FontSize="22" FontAttributes="Bold"
+                                   TextColor="#A855F7"/>
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Column="1"
+                            Stroke="#4A3570"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="16,14">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#2D1B4E" Offset="0"/>
+                                <GradientStop Color="#3D2B5E" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="연간 예상"
+                                   FontSize="11" TextColor="#7C6A9E"/>
+                            <Label Text="{Binding TotalYearlyText}"
+                                   FontSize="22" FontAttributes="Bold"
+                                   TextColor="#EC4899"/>
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <!-- 로딩 -->
+                <ActivityIndicator Grid.Row="2"
+                                   IsRunning="{Binding IsLoading}"
+                                   IsVisible="{Binding IsLoading}"
+                                   Color="#A855F7"
+                                   HeightRequest="24"/>
+            </Grid>
+        </Border>
+
+        <!-- 탭 버튼 -->
+        <Grid Grid.Row="1"
+              ColumnDefinitions="*,*"
+              BackgroundColor="#1A0A2E"
+              Padding="16,10"
+              ColumnSpacing="10">
+            <Border Grid.Column="0"
+                    BackgroundColor="{Binding SelectedTabIndex,
+                                     Converter={StaticResource Tab0ColorConverter}}"
+                    Stroke="#4A3570"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="0,12">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnListTabTapped"/>
+                </Border.GestureRecognizers>
+                <Label Text="📋  구독 목록"
+                       FontSize="14" FontAttributes="Bold"
+                       HorizontalTextAlignment="Center"
+                       TextColor="#F5F0FF"/>
+            </Border>
+            <Border Grid.Column="1"
+                    BackgroundColor="{Binding SelectedTabIndex,
+                                     Converter={StaticResource Tab1ColorConverter}}"
+                    Stroke="#4A3570"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="0,12">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnAddTabTapped"/>
+                </Border.GestureRecognizers>
+                <Label Text="➕  구독 추가"
+                       FontSize="14" FontAttributes="Bold"
+                       HorizontalTextAlignment="Center"
+                       TextColor="#F5F0FF"/>
+            </Border>
+        </Grid>
+
+        <!-- 구독 목록 탭 -->
+        <ScrollView Grid.Row="2"
+            IsVisible="{Binding IsListTabVisible}">
+            <VerticalStackLayout Padding="16" Spacing="10">
+
+                <!-- 비어있을 때 -->
+                <VerticalStackLayout IsVisible="{Binding Subscriptions.Count,
+                                                 Converter={StaticResource InverseBoolConverter}}"
+                                     HorizontalOptions="Center"
+                                     Spacing="14"
+                                     Margin="0,60,0,0">
+                    <Label Text="💳" FontSize="64"
+                           HorizontalTextAlignment="Center"/>
+                    <Label Text="구독 중인 서비스가 없어요"
+                           FontSize="17" FontAttributes="Bold"
+                           TextColor="#F5F0FF"
+                           HorizontalTextAlignment="Center"/>
+                    <Label Text="➕ 구독 추가 탭에서 추가해보세요"
+                           FontSize="13" TextColor="#7C6A9E"
+                           HorizontalTextAlignment="Center"/>
+                </VerticalStackLayout>
+
+                <!-- 구독 카드 목록 -->
+                <CollectionView ItemsSource="{Binding Subscriptions}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:SubscriptionModel">
+                            <Border Stroke="#4A3570"
+                                    StrokeThickness="1"
+                                    StrokeShape="RoundRectangle 16"
+                                    Padding="16"
+                                    Margin="0,0,0,10">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#2D1B4E" Offset="0"/>
+                                        <GradientStop Color="#251542" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+
+                                    <!-- 카테고리 아이콘 -->
+                                    <Border Grid.Column="0"
+                                            BackgroundColor="#1A0A2E"
+                                            Stroke="#4A3570"
+                                            StrokeThickness="1"
+                                            StrokeShape="RoundRectangle 14"
+                                            WidthRequest="54"
+                                            HeightRequest="54">
+                                        <Label Text="{Binding CategoryEmoji}"
+                                               FontSize="26"
+                                               HorizontalOptions="Center"
+                                               VerticalOptions="Center"/>
+                                    </Border>
+
+                                    <!-- 정보 -->
+                                    <VerticalStackLayout Grid.Column="1"
+                                                         VerticalOptions="Center"
+                                                         Spacing="3">
+                                        <Label Text="{Binding Name}"
+                                               FontSize="16" FontAttributes="Bold"
+                                               TextColor="#F5F0FF"/>
+                                        <HorizontalStackLayout Spacing="6">
+                                            <Label Text="{Binding AmountText}"
+                                                   FontSize="14" FontAttributes="Bold"
+                                                   TextColor="#A855F7"/>
+                                            <Label Text="·"
+                                                   FontSize="13" TextColor="#4A3570"/>
+                                            <Label Text="{Binding BillingCycleText}"
+                                                   FontSize="12" TextColor="#7C6A9E"/>
+                                        </HorizontalStackLayout>
+                                        <Label Text="{Binding MonthlyAmountKRWText}"
+                                               FontSize="11" TextColor="#7C6A9E"/>
+                                    </VerticalStackLayout>
+
+                                    <!-- D-Day + 삭제 -->
+                                    <VerticalStackLayout Grid.Column="2"
+                                                         HorizontalOptions="End"
+                                                         Spacing="6">
+                                        <Border StrokeShape="RoundRectangle 8"
+                                                Padding="10,4">
+                                            <Border.BackgroundColor>
+                                                <Binding Path="DDayColor"/>
+                                            </Border.BackgroundColor>
+                                            <Label Text="{Binding DDayText}"
+                                                   FontSize="12" FontAttributes="Bold"
+                                                   TextColor="White"
+                                                   HorizontalTextAlignment="Center"/>
+                                        </Border>
+                                        <Border BackgroundColor="#3D2B5E"
+                                                Stroke="#4A3570"
+                                                StrokeThickness="1"
+                                                StrokeShape="RoundRectangle 8"
+                                                Padding="10,4">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Tapped="OnDeleteTapped"
+                                                    CommandParameter="{Binding .}"/>
+                                            </Border.GestureRecognizers>
+                                            <Label Text="삭제"
+                                                   FontSize="11"
+                                                   TextColor="#F43F5E"
+                                                   HorizontalTextAlignment="Center"/>
+                                        </Border>
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- 구독 추가 탭 -->
+        <ScrollView Grid.Row="2"
+            IsVisible="{Binding IsAddTabVisible}">
+            <VerticalStackLayout Padding="16" Spacing="14">
+
+                <Label Text="새 구독 추가"
+                       FontSize="20" FontAttributes="Bold"
+                       TextColor="#F5F0FF"/>
+
+                <!-- 서비스 이름 -->
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="서비스 이름" FontSize="12"
+                           TextColor="#C4B5D4"/>
+                    <Border BackgroundColor="#2D1B4E"
+                            Stroke="#4A3570"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="14,0">
+                        <Entry Text="{Binding NewName}"
+                               Placeholder="예) 넷플릭스"
+                               PlaceholderColor="#7C6A9E"
+                               TextColor="#F5F0FF"
+                               BackgroundColor="Transparent"
+                               FontSize="15"
+                               HeightRequest="48"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- 금액 + 통화 -->
+                <Grid ColumnDefinitions="*,110" ColumnSpacing="10">
+                    <VerticalStackLayout Grid.Column="0" Spacing="6">
+                        <Label Text="금액" FontSize="12" TextColor="#C4B5D4"/>
+                        <Border BackgroundColor="#2D1B4E"
+                                Stroke="#4A3570"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 12"
+                                Padding="14,0">
+                            <Entry Text="{Binding NewAmount}"
+                                   Placeholder="0"
+                                   PlaceholderColor="#7C6A9E"
+                                   TextColor="#F5F0FF"
+                                   BackgroundColor="Transparent"
+                                   Keyboard="Numeric"
+                                   FontSize="15"
+                                   HeightRequest="48"/>
+                        </Border>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="6">
+                        <Label Text="통화" FontSize="12" TextColor="#C4B5D4"/>
+                        <Border BackgroundColor="#2D1B4E"
+                                Stroke="#4A3570"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 12"
+                                Padding="4,0">
+                            <Picker ItemsSource="{Binding CurrencyList}"
+                                    SelectedIndex="0"
+                                    SelectedIndexChanged="OnCurrencyChanged"
+                                    TextColor="#F5F0FF"
+                                    BackgroundColor="Transparent"
+                                    HeightRequest="48"/>
+                        </Border>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <!-- 결제 주기 + 결제일 -->
+                <Grid ColumnDefinitions="*,110" ColumnSpacing="10">
+                    <VerticalStackLayout Grid.Column="0" Spacing="6">
+                        <Label Text="결제 주기" FontSize="12" TextColor="#C4B5D4"/>
+                        <Border BackgroundColor="#2D1B4E"
+                                Stroke="#4A3570"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 12"
+                                Padding="4,0">
+                            <Picker ItemsSource="{Binding BillingCycleList}"
+                                    SelectedIndex="0"
+                                    SelectedIndexChanged="OnBillingCycleChanged"
+                                    TextColor="#F5F0FF"
+                                    BackgroundColor="Transparent"
+                                    HeightRequest="48"/>
+                        </Border>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="6">
+                        <Label Text="결제일" FontSize="12" TextColor="#C4B5D4"/>
+                        <Border BackgroundColor="#2D1B4E"
+                                Stroke="#4A3570"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 12"
+                                Padding="14,0">
+                            <Entry Text="{Binding NewBillingDay}"
+                                   Placeholder="1"
+                                   PlaceholderColor="#7C6A9E"
+                                   TextColor="#F5F0FF"
+                                   BackgroundColor="Transparent"
+                                   Keyboard="Numeric"
+                                   FontSize="15"
+                                   HeightRequest="48"/>
+                        </Border>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <!-- 카테고리 -->
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="카테고리" FontSize="12" TextColor="#C4B5D4"/>
+                    <Border BackgroundColor="#2D1B4E"
+                            Stroke="#4A3570"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="4,0">
+                        <Picker ItemsSource="{Binding CategoryList}"
+                                SelectedIndex="7"
+                                SelectedIndexChanged="OnCategoryChanged"
+                                TextColor="#F5F0FF"
+                                BackgroundColor="Transparent"
+                                HeightRequest="48"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- 메모 -->
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="메모 (선택)" FontSize="12" TextColor="#C4B5D4"/>
+                    <Border BackgroundColor="#2D1B4E"
+                            Stroke="#4A3570"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="14,0">
+                        <Entry Text="{Binding NewMemo}"
+                               Placeholder="메모를 입력하세요"
+                               PlaceholderColor="#7C6A9E"
+                               TextColor="#F5F0FF"
+                               BackgroundColor="Transparent"
+                               FontSize="15"
+                               HeightRequest="48"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- 추가 버튼 -->
+                <Border StrokeShape="RoundRectangle 14"
+                        Padding="0,16"
+                        Margin="0,8,0,20">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#A855F7" Offset="0"/>
+                            <GradientStop Color="#EC4899" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnAddTapped"/>
+                    </Border.GestureRecognizers>
+                    <Label Text="구독 추가하기"
+                           FontSize="16" FontAttributes="Bold"
+                           TextColor="White"
+                           HorizontalTextAlignment="Center"/>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- 하단 상태바 -->
+        <Border Grid.Row="3"
+        BackgroundColor="#2D1B4E"
+        Stroke="#4A3570"
+        StrokeThickness="1"
+        Padding="20,10">
+            <Label Text="{Binding Subscriptions.Count, StringFormat='총 {0}개 구독 · PayCheck'}"
+           FontSize="12" TextColor="#7C6A9E"
+           HorizontalTextAlignment="Center"/>
+        </Border>
+
+    </Grid>
+</ContentPage>

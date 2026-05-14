@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<Application x:Class="SubscriptionTracker.App"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:SubscriptionTracker.Converters">
+    <Application.Resources>
+        <ResourceDictionary>
+            <converters:NullToBoolConverter x:Key="NullToBoolConverter"/>
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
+            <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
+            <converters:TabColorConverter x:Key="Tab0ColorConverter" ActiveIndex="0"/>
+            <converters:TabColorConverter x:Key="Tab1ColorConverter" ActiveIndex="1"/>
+
+            <!-- 새 색상 팔레트 - 따뜻한 다크 퍼플 -->
+            <Color x:Key="BgDark">#1A0A2E</Color>
+            <Color x:Key="BgCard">#2D1B4E</Color>
+            <Color x:Key="BgSurface">#3D2B5E</Color>
+            <Color x:Key="AccentViolet">#A855F7</Color>
+            <Color x:Key="AccentPink">#EC4899</Color>
+            <Color x:Key="AccentCyan">#06B6D4</Color>
+            <Color x:Key="AccentGreen">#10B981</Color>
+            <Color x:Key="AccentRose">#F43F5E</Color>
+            <Color x:Key="AccentAmber">#F59E0B</Color>
+            <Color x:Key="TextPrimary">#F5F0FF</Color>
+            <Color x:Key="TextSecondary">#C4B5D4</Color>
+            <Color x:Key="TextMuted">#7C6A9E</Color>
+            <Color x:Key="BorderColor">#4A3570</Color>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
